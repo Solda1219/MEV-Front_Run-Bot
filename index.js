@@ -203,6 +203,7 @@ let watchEvent= async (event) =>{
                                 if(honeypotCheck){
                                     honeyChecked = checkHoneyPot(secondToken);
                                 }
+<<<<<<< HEAD
                                 if(honeyChecked){
                                     console.log("===========Honeypot Checking passed!==============");
                                     console.log("===========Start Trading==============");
@@ -220,6 +221,18 @@ let watchEvent= async (event) =>{
                                         console.log("=======Error occured while trying to swap buyed token");
                                         return 0;
                                     }
+=======
+                                catch{
+                                    console.log("=======Error occured while trying to swap ETH========");
+                                    return 0;
+                                }
+                                try{
+                                    await swapExactTokensForETHSupportingFeeOnTransferTokens({ tokenAddress: secondToken, baseToken: WETH_ADDRESS, gasPrice: swapTokenGasPrice});
+                                }
+                                catch{
+                                    console.log("=======Error occured while trying to swap buyed token=========");
+                                    return 0;
+>>>>>>> a4ff42dd7cea2afcb1f285a4060062a42b15fc4e
                                 }
                                  // Here Place 2 transactions. One is for buying second token with high gasPrice and Other is for selling second token with low gasPrice
                                 
@@ -232,7 +245,7 @@ let watchEvent= async (event) =>{
                        
                     }
                     else{
-                        console.log("==============Found swap transaction but start coin is not ETH");
+                        console.log("==============Found swap transaction but start coin is not ETH=================");
                     }
                 }
             } 
