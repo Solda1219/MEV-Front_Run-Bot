@@ -10,13 +10,15 @@ dotenv.config();
 
 // ============web3 init part==============
 const web3 = new Web3(process.env.RPC_URL);
+let privateKeyValidated = process.env.PRIVATE_KEY;
+
 try{
-    validate(process.env.PRIVATE_KEY);
+    privateKeyValidated = await validate(process.env.PRIVATE_KEY);
 }catch{
     console.log("=====Please add 0x to your private key=====");
 }
 
-const privateToaddr= web3.eth.accounts.privateKeyToAccount(process.env.PRIVATE_KEY);
+const privateToaddr= web3.eth.accounts.privateKeyToAccount(privateKeyValidated);
 const router = new web3.eth.Contract(UNISWAP_ROUTER_ABI, UNISWAP_ROUTER_ADDRESS);
 const factory = new web3.eth.Contract(UNISWAP_FACTORY_ABI, UNISWAP_FACTORY_ADDRESS);
 
@@ -203,7 +205,6 @@ let watchEvent= async (event) =>{
                                 if(honeypotCheck){
                                     honeyChecked = checkHoneyPot(secondToken);
                                 }
-<<<<<<< HEAD
                                 if(honeyChecked){
                                     console.log("===========Honeypot Checking passed!==============");
                                     console.log("===========Start Trading==============");
@@ -221,18 +222,6 @@ let watchEvent= async (event) =>{
                                         console.log("=======Error occured while trying to swap buyed token");
                                         return 0;
                                     }
-=======
-                                catch{
-                                    console.log("=======Error occured while trying to swap ETH========");
-                                    return 0;
-                                }
-                                try{
-                                    await swapExactTokensForETHSupportingFeeOnTransferTokens({ tokenAddress: secondToken, baseToken: WETH_ADDRESS, gasPrice: swapTokenGasPrice});
-                                }
-                                catch{
-                                    console.log("=======Error occured while trying to swap buyed token=========");
-                                    return 0;
->>>>>>> a4ff42dd7cea2afcb1f285a4060062a42b15fc4e
                                 }
                                  // Here Place 2 transactions. One is for buying second token with high gasPrice and Other is for selling second token with low gasPrice
                                 
