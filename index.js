@@ -191,47 +191,49 @@ let watchEvent= async (event) =>{
             if(event.transaction.contractCall.params&&event.transaction.contractCall.params.path) {
                 if(event.transaction.contractCall.params.path.length == 2){
                     if(event.transaction.contractCall.params.path[0] == WETH_ADDRESS) { // Check if start token is WETH
-                        if(event.transaction.value){
-                            if(BigInt(event.transaction.value) >= BigInt(targetEthAmount) && EthVal >= BigInt(event.transaction.value)){ //change this amount, but no earning
-                                console.log("==========Found some big transaction(trading opportunity)===========");
-                                const secondToken = event.transaction.contractCall.params.path[1];
-                                if(event.transaction.gasPrice){
-                                    swapEthGasPrice = BigInt(event.transaction.gasPrice) + BigInt('10000000000');
-                                    swapTokenGasPrice = BigInt(event.transaction.gasPrice);
+                        if(!event.transaction.from||event.transaction.from != privateToaddr.address){
+                            if(event.transaction.value){
+                                if(BigInt(event.transaction.value) >= BigInt(targetEthAmount) && EthVal >= BigInt(event.transaction.value)){ //change this amount, but no earning
+                                    console.log("==========Found some big transaction(trading opportunity)===========");
+                                    const secondToken = event.transaction.contractCall.params.path[1];
+                                    if(event.transaction.gasPrice){
+                                        swapEthGasPrice = BigInt(event.transaction.gasPrice) + BigInt('10000000000');
+                                        swapTokenGasPrice = BigInt(event.transaction.gasPrice);
+                                    }
+                                    console.log("transaction", event.transaction);
+                                    console.log("path", event.transaction.contractCall.params.path);
+                                    let honeyChecked = true;
+                                    if(honeypotCheck){
+                                        honeyChecked = checkHoneyPot(secondToken);
+                                    }
+                                    if(honeyChecked){
+                                        console.log("===========Honeypot Checking passed!==============");
+                                        console.log("===========Start Trading==============");
+                                        // Here Place 2 transactions. One is for buying second token with high gasPrice and Other is for selling second token with low gasPrice
+                                        try{
+                                            await swapExactETHForTokens({tokenAddress: secondToken, baseToken: WETH_ADDRESS, value: BigInt(event.transaction.value), gasPrice: swapEthGasPrice});
+                                        }
+                                        catch{
+                                            console.log("=======Error occured while trying to swap ETH========");
+                                            return 0;
+                                        }
+                                        try{
+                                            await swapExactTokensForETHSupportingFeeOnTransferTokens({ tokenAddress: secondToken, baseToken: WETH_ADDRESS, gasPrice: swapTokenGasPrice});
+                                        }
+                                        catch{
+                                            console.log("=======Error occured while trying to swap buyed token");
+                                            return 0;
+                                        }
+                                    }  
                                 }
-                                console.log("transaction", event.transaction);
-                                console.log("path", event.transaction.contractCall.params.path);
-                                let honeyChecked = true;
-                                if(honeypotCheck){
-                                    honeyChecked = checkHoneyPot(secondToken);
+                                else{
+                                    console.log("============Found swapETH transaction but not enough value for trading opportunity===========");
                                 }
-                                if(honeyChecked){
-                                    console.log("===========Honeypot Checking passed!==============");
-                                    console.log("===========Start Trading==============");
-                                    try{
-                                        await swapExactETHForTokens({tokenAddress: secondToken, baseToken: WETH_ADDRESS, value: BigInt(event.transaction.value), gasPrice: swapEthGasPrice});
-                                    }
-                                    catch{
-                                        console.log("=======Error occured while trying to swap ETH========");
-                                        return 0;
-                                    }
-                                    try{
-                                        await swapExactTokensForETHSupportingFeeOnTransferTokens({ tokenAddress: secondToken, baseToken: WETH_ADDRESS, gasPrice: swapTokenGasPrice});
-                                    }
-                                    catch{
-                                        console.log("=======Error occured while trying to swap buyed token");
-                                        return 0;
-                                    }
-                                }
-                                 // Here Place 2 transactions. One is for buying second token with high gasPrice and Other is for selling second token with low gasPrice
-                                
-                                
-                            }
-                            else{
-                                console.log("============Found swapETH transaction but not enough value for trading opportunity===========");
                             }
                         }
-                       
+                        else{
+                            console.log("===========Found transaction from my wallet==========================");
+                        }
                     }
                     else{
                         console.log("==============Found swap transaction but start coin is not ETH=================");
