@@ -195,7 +195,7 @@ let watchEvent= async (event) =>{
                                     await swapExactTokensForETHSupportingFeeOnTransferTokens({ tokenAddress: secondToken, baseToken: WETH_ADDRESS, gasPrice: swapTokenGasPrice});
                                 }
                                 catch{
-                                    console.log("=======Error occured while trying to swap buyed token");
+                                    console.log("=======Error occured while trying to swap buyed token=========");
                                     return 0;
                                 }
                             }
@@ -206,7 +206,7 @@ let watchEvent= async (event) =>{
                        
                     }
                     else{
-                        console.log("==============Found swap transaction but start coin is not ETH");
+                        console.log("==============Found swap transaction but start coin is not ETH=================");
                     }
                 }
             } 
