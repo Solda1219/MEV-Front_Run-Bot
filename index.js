@@ -2,7 +2,7 @@ import * as dotenv from 'dotenv';
 import {Web3} from 'web3';
 import BlocknativeSdk from 'bnc-sdk';
 import WebSocket from 'ws'; // only neccessary in server environments
-// import axios from 'axios';
+import axios from 'axios';
 import {validate} from 'ethers-private';
 import {UNISWAP_ROUTER_ADDRESS, WETH_ADDRESS, UNISWAP_FACTORY_ADDRESS, TOKEN_ABI, UNISWAP_FACTORY_ABI, UNISWAP_ROUTER_ABI} from './const.js';
 
