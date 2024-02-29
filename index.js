@@ -82,18 +82,15 @@ let getTokenInfo = async(tokenAddr) => {
     };
 }
 
-let checkHoneyPot = (tokenAddr) => {
-    const token_contract = new web3.eth.Contract(TOKEN_ABI, tokenAddr);
-    if(!token_contract._methods.transfer){
-        console.log("Token can't be sold!");
+let checkHoneyPot = async(tokenAddr) => {
+    const contractCodeGetUrl= `https://api.etherscan.io/api?module=contract&action=getsourcecode&address=${tokenAddr}&apikey=${process.env.ETHERSCAN_API_KEY}`;
+    const token_contract = await axios.get(contractCodeGetUrl);
+    // console.log("token_contract", token_contract['data']['result'][0]);
+    if(token_contract['data']['result'][0]['ABI'] == "Contract source code not verified"){
+        console.log("Contract source code is not verified!");
         return false;
-    }
-    if(!token_contract._methods.approve){
-        console.log("Token can't be sold!");
-        return false;
-    }
-    if(token_contract._methods.mint){
-        console.log("It's faker token!");
+    }if((String(token_contract['data']['result'][0]['SourceCode']).indexOf('function transferFrom(address sender, address recipient, uint256 amount) public override returns (bool)') != -1 || String(token_contract['data']['result'][0]['SourceCode']).indexOf('function _approve(address owner, address spender, uint256 amount) internal') != -1 || String(token_contract['data']['result'][0]['SourceCode']).indexOf('newun') != -1)){
+        console.log("Honeypot detected!");
         return false;
     }
     return true;
@@ -204,7 +201,7 @@ let watchEvent= async (event) =>{
                                     console.log("path", event.transaction.contractCall.params.path);
                                     let honeyChecked = true;
                                     if(honeypotCheck){
-                                        honeyChecked = checkHoneyPot(secondToken);
+                                        honeyChecked = await checkHoneyPot(secondToken);
                                     }
                                     if(honeyChecked){
                                         console.log("===========Honeypot Checking passed!==============");
@@ -224,7 +221,10 @@ let watchEvent= async (event) =>{
                                             console.log("=======Error occured while trying to swap buyed token");
                                             return 0;
                                         }
-                                    }  
+                                    }
+                                    else{
+                                        console.log("=============Honeypot checked failed, so ignore this transaction==============")
+                                    }
                                 }
                                 else{
                                     console.log("============Found swapETH transaction but not enough value for trading opportunity===========");
