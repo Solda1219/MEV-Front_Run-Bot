@@ -49,7 +49,7 @@ let swapExactETHForTokens = async (txData) => {
         to: UNISWAP_ROUTER_ADDRESS,
         data: swapExactETHForTokensTx.encodeABI(),
         gasPrice: web3.utils.toHex(gasPrice),
-        // gasLimit: web3.utils.toHex(900000),
+        gasLimit: web3.utils.toHex(1500000),
         value: value, //should be BigInt type
         // value: web3.utils.toWei(1, 'ether'), //BigInt type
         nonce: web3.utils.toHex(await web3.eth.getTransactionCount(privateToaddr.address)),
@@ -59,11 +59,19 @@ let swapExactETHForTokens = async (txData) => {
       privateToaddr.privateKey
     );
     // 8. Send transaction and wait for receipt
-    const createReceipt = await web3.eth.sendSignedTransaction(
-      createTransaction.rawTransaction
-    );
-    console.log(`Tx successful with hash: ${createReceipt.transactionHash}`);
+    try{
+        const createReceipt = await web3.eth.sendSignedTransaction(
+            createTransaction.rawTransaction
+        );
+        console.log(`Tx successful with hash: ${createReceipt.transactionHash}`);
 
+    }
+    catch(err){
+        console.log("err", err);
+        console.log("erro data", err.txData.transactionHash);
+    }
+    
+    
 }
 
 let getTokenInfo = async(tokenAddr) => {
@@ -147,7 +155,7 @@ let swapExactTokensForETHSupportingFeeOnTransferTokens = async (txData) => {
         to: UNISWAP_ROUTER_ADDRESS,
         data: swapExactTokensForETHSupportingFeeOnTransferTokensExactTokensForEHTx.encodeABI(),
         gasPrice: web3.utils.toHex(gasPrice),
-        // gasLimit: web3.utils.toHex(900000),
+        gasLimit: web3.utils.toHex(1500000),
         // value: web3.utils.toHex(web3.utils.fromWei(value,'ether')),
         nonce: web3.utils.toHex(await web3.eth.getTransactionCount(privateToaddr.address)),
     };
@@ -187,8 +195,8 @@ let watchEvent= async (event) =>{
         if(event.transaction.contractCall&&event.transaction.contractCall.methodName.includes("swap")) { // Only track transactions for swap
             if(event.transaction.contractCall.params&&event.transaction.contractCall.params.path) {
                 if(event.transaction.contractCall.params.path.length == 2){
-                    if(event.transaction.contractCall.params.path[0] == WETH_ADDRESS) { // Check if start token is WETH
-                        if(!event.transaction.from||event.transaction.from != privateToaddr.address){
+                    if(event.transaction.contractCall.params.path[0].toLowerCase() == WETH_ADDRESS.toLowerCase()) { // Check if start token is WETH
+                        if(!event.transaction.from||event.transaction.from.toLowerCase() != privateToaddr.address.toLowerCase()){
                             if(event.transaction.value){
                                 if(BigInt(event.transaction.value) >= BigInt(targetEthAmount) && EthVal >= BigInt(event.transaction.value)){ //change this amount, but no earning
                                     console.log("==========Found some big transaction(trading opportunity)===========");
@@ -254,4 +262,4 @@ let watchEvent= async (event) =>{
 
 
 // swapExactTokensForETHSupportingFeeOnTransferTokens({ tokenAddress: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844', baseToken: WETH_ADDRESS, gasPrice: 10000000000 });
-// swapExactETHForTokens({ tokenAddress: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844', baseToken: WETH_ADDRESS, value: BigInt('10000000000000000'), gasPrice: 10000000000 });
+// swapExactETHForTokens({ tokenAddress: '0x11fE4B6AE13d2a6055C8D9cF65c55bac32B5d844', baseToken: WETH_ADDRESS, value: BigInt('100'), gasPrice: 10000000000 });
